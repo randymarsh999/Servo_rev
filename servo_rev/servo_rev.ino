@@ -6,6 +6,7 @@
 int servoPin = 9;            // порт подключени€ сервы
 int KeyPin = 8;
 int temp = 1;
+int outVal = 0;
 //переменные дл€ угла поворота
 int myAngle;                 // будет хранить угол поворота
 int pulseWidth;              // длительность импульса
@@ -22,6 +23,17 @@ int RelayPolarN = 10;        //”казываем, что вывод реле, подключен к реле цифро
 
 							 //угол поворота серво привода
 float Step = 5.0F / 1024; // ¬ычисл€ем шаг Uопорн / на градацию 
+
+
+
+const int numReadings = 10;
+int readings[numReadings];      // the readings from the analog input
+int readIndex = 0;              // the index of the current reading
+int total = 0;                  // the running total
+int average = 0;
+int inputPin = A5;
+
+
 void servoPulse(int servoPin, int myAngle)
 {
 	pulseWidth = (myAngle * 11) + 500;  // конвертируем угол в микросекунды
@@ -72,6 +84,45 @@ void StartRelayN()
 	delay(500);
 }
 
+
+
+
+
+
+// функци€ считывает аналоговый вход заданное количество раз
+// и возвращает медианное отфильтрованное значение
+int readMedian(int pin, int samples) {
+	// массив дл€ хранени€ данных
+	int raw[samples];
+	// считываем вход и помещаем величину в €чейки массива
+	for (int i = 0; i < samples; i++) {
+		raw[i] = analogRead(pin);
+	}
+	// сортируем массив по возрастанию значений в €чейках
+	int temp = 0; // временна€ переменна€
+
+	for (int i = 0; i < samples; i++) {
+		for (int j = 0; j < samples - 1; j++) {
+			if (raw[j] > raw[j + 1]) {
+				temp = raw[j];
+				raw[j] = raw[j + 1];
+				raw[j + 1] = temp;
+			}
+		}
+	}
+	// возвращаем значение средней €чейки массива
+	return raw[samples / 2];
+}
+
+
+
+
+
+
+
+
+
+
 // the setup function runs once when you press reset or power the board
 void setup() {
 	// put your setup code here, to run once:
@@ -94,16 +145,63 @@ void setup() {
 	delay(1000); // ∆дем 0.5 секунды 
 	StopRelayN();
 	delay(1000); // ∆дем 0.5 секунды 
+
+	pinMode(inputPin, INPUT);	//set port A5 as input read value
+	for (int thisReading = 0; thisReading < numReadings; thisReading++) 
+	{
+			readings[thisReading] = 0;
+	}
+
 }
 
 // the loop function runs over and over again until power down or reset
 void loop() {
+	char outstr[10];
+	float f_val;
+	
 	int analogValue = analogRead(0); // «адаем переменную analogValue дл€ считывани€ показаний 
 	float voltageValue = analogValue * Step; // ѕереводим в вольты (показание * шаг) 
 	delay(500); // ∆дем пол секунды 
 
-				//фрагмент кода дл€ выключени€ всей сети
-	if (alarm == 'n' && voltageValue>3.0)
+
+
+
+
+	total = total - readings[readIndex];
+	outVal = analogRead(inputPin);
+	float f_val = (5.000 / 1024.000)*outVal;
+	
+	readings[readIndex] = analogRead(inputPin);
+	total = total + readings[readIndex];
+	readIndex = readIndex + 1;
+	
+	if (readIndex >= numReadings) {
+		readIndex = 0;
+	}
+	average = total / numReadings;
+	Serial.print("Avarage = ");
+	Serial.println(average);
+
+	
+	
+	
+	delay(100);
+	Serial.print("Median = ");
+	Serial.println(readMedian(inputPin, 15));
+	delay(100);
+
+
+	
+	outVal = analogRead(A5);
+	delay(200); // wait 0.100
+	f_val = (5.000 / 1024.000)*outVal;
+	dtostrf(f_val, 7, 3, outstr);
+	Serial.println(outstr);
+	delay(500);
+				
+				
+	//full turn off
+	/*if (alarm == 'n' && voltageValue>3.0)
 	{
 		StopRelay();
 		Serial.write('a');
@@ -113,7 +211,7 @@ void loop() {
 	{
 		StopRelay();
 		Serial.write('a');
-	}
+	}*/
 
 	if (Serial.available() > 0)
 	{
