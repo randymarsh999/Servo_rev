@@ -22,13 +22,12 @@ int RelayPolarN = 10;        //Указываем, что вывод реле, подключен к реле цифро
 							 //4-5 земля
 
 							 //угол поворота серво привода
-float Step = 5.0F / 1024; // Вычисляем шаг Uопорн / на градацию 
+float Step = 3.34F / 1023; // Вычисляем шаг Uопорн / на градацию 
 
 
 
 const int numReadings = 10;
-int readings[numReadings];      // the readings from the analog input
-int readingsF[numReadings];      // the readings from the analog input
+
 int readIndex = 0;              // the index of the current reading
 int readIndex1 = 0;              // the index of the current reading
 int readIndexnew = 0;              // the index of the current reading
@@ -37,6 +36,7 @@ int total = 0;                  // the running total
 int total1 = 0;                  // the running total
 int totalnew = 0;                  // the running total
 int totalnew1= 0;                  // the running total
+
 int average = 0;
 int average1 = 0;
 int inputPin = A5;
@@ -50,18 +50,18 @@ void servoPulse(int servoPin, int myAngle)
 	digitalWrite(servoPin, LOW);        // устанавливаем низкий уровень
 	delay(20);                          // 
 }
-//фрагмент кода для управления реле питания
+//Fragment for power relay
 //---------------------------------------------------------------------------------
-//Открыть реле питания
+//Open power relay
 void StartRelay()
 {
-	digitalWrite(Relay, HIGH); // Выключаем реле
+	digitalWrite(Relay, HIGH); // Power on
 	delay(500);
 }
-//Закрыть реле питания 
+//Close power relay
 void StopRelay()
 {
-	digitalWrite(Relay, LOW); // Выключаем реле
+	digitalWrite(Relay, LOW); // Power off
 	delay(500);
 }
 
@@ -92,45 +92,6 @@ void StartRelayN()
 	delay(500);
 }
 
-
-
-
-
-
-// функция считывает аналоговый вход заданное количество раз
-// и возвращает медианное отфильтрованное значение
-//int readMedian(int pin, int samples) {
-//	// массив для хранения данных
-//	int raw[samples];
-//	// считываем вход и помещаем величину в ячейки массива
-//	for (int i = 0; i < samples; i++) {
-//		raw[i] = analogRead(pin);
-//	}
-//	// сортируем массив по возрастанию значений в ячейках
-//	int temp = 0; // временная переменная
-//
-//	for (int i = 0; i < samples; i++) {
-//		for (int j = 0; j < samples - 1; j++) {
-//			if (raw[j] > raw[j + 1]) {
-//				temp = raw[j];
-//				raw[j] = raw[j + 1];
-//				raw[j + 1] = temp;
-//			}
-//		}
-//	}
-//	// возвращаем значение средней ячейки массива
-//	return raw[samples / 2];
-//}
-
-
-
-
-
-
-
-
-
-
 // the setup function runs once when you press reset or power the board
 void setup() {
 	// put your setup code here, to run once:
@@ -148,17 +109,13 @@ void setup() {
 	pinMode(RelayPolarN, OUTPUT);           // сконфигурировали выход для управления реле полярности
 
 	Serial.begin(9600);                     //установили скорость Com порта
-	delay(1000); // Ждем 0.5 секунды 
+	delay(1000); // wait 1 sec
 	StopRelayP();
-	delay(1000); // Ждем 0.5 секунды 
+	delay(1000); // wait 1 sec
 	StopRelayN();
-	delay(1000); // Ждем 0.5 секунды 
+	delay(1000); // wait 1 sec
 
 	pinMode(inputPin, INPUT);	//set port A5 as input read value
-	for (int thisReading = 0; thisReading < numReadings; thisReading++) 
-	{
-			readings[thisReading] = 0;
-	}
 	analogReference(EXTERNAL);
 
 }
@@ -170,7 +127,6 @@ void loop() {
 	int in;
 
 	in = analogRead(inputPin);
-	readingsF[readIndex] = in;
 	total1 = total1 + analogRead(inputPin);
 	readIndex1 = readIndex1 + 1;
 	if (readIndex1 >= numReadings) {
@@ -184,7 +140,7 @@ void loop() {
 	if (readIndexnew >= numReadings)
 	{
 		totalnew = totalnew / numReadings;
-		f_val = (3.34 / 1023.00)*totalnew;
+		f_val = Step*totalnew;
 		dtostrf(f_val, 7, 3, outstr);
 		//Serial.print("avar1=");
 		//Serial.println(outstr);
@@ -197,7 +153,7 @@ void loop() {
 	if (readIndexnew1 >= numReadings)
 	{
 		totalnew1 = totalnew1 / numReadings;
-		f_val = (3.34 / 1023.00)*totalnew1;
+		f_val = Step*totalnew1;
 		dtostrf(f_val, 7, 3, outstr);
 		Serial.print("Last average=");
 		Serial.println(outstr);
@@ -281,6 +237,10 @@ void loop() {
 			delay(100); // Ждем 0.1 секунды 
 			return;
 		}
+
+
+
+
 		//реле отрицательной полярности        
 		case 'c': //включение реле отрицательной полярности
 		{
