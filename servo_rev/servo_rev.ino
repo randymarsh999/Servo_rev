@@ -39,7 +39,7 @@ int totalnew1= 0;                  // the running total
 
 int average = 0;
 int average1 = 0;
-int inputPin = A5;
+int inputPin = A4;
 
 
 void servoPulse(int servoPin, int myAngle)
@@ -179,7 +179,7 @@ void loop() {
 
 	if (Serial.available() > 0)
 	{
-		int ang = 3; //угол поворота
+		int ang = 3; //rotate angle
 		int val = Serial.read();
 		switch (val)
 		{
