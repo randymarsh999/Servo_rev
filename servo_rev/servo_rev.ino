@@ -155,14 +155,11 @@ void loop() {
 		totalnew1 = totalnew1 / numReadings;
 		f_val = Step*totalnew1;
 		dtostrf(f_val, 7, 3, outstr);
-		Serial.print("Last average=");
-		Serial.println(outstr);
 		totalnew = 0;
 		readIndexnew = 0;
 		totalnew1 = 0;
 		readIndexnew1 = 0;
 	}
-
 			
 	//full turn off
 	/*if (alarm == 'n' && voltageValue>3.0)
@@ -185,6 +182,14 @@ void loop() {
 		{
 			//управление сервоприводом
 			//---------------------------------------------------------------------------------
+		case 'm':
+		{
+			Serial.print("Last average1=");
+			Serial.println(outstr);
+			delay(500);
+			return;
+		}
+		
 		case '-': //уменьшение угла поворта
 		{
 			for (myAngle = 0; myAngle <= ang; myAngle++) {
