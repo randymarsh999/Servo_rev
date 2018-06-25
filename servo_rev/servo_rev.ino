@@ -4,7 +4,7 @@ Created:	22.06.2018 12:30:49
 Author:	root
 */
 int potPin = A5;
-float Step = 5.16 / 1024;
+float Step = 5.11 / 1024;
 
 int RelayPower = 12;
 int RelayPolarPower = 6;
@@ -138,7 +138,9 @@ void loop() {
 		{
 			for (myAngle = 0; myAngle <= ang; myAngle++) {
 				servoPulse(servoPin, myAngle);
+				delay(2);
 			}
+			delay(500);
 			return;
 		}
 		//increase angle of servo engine
@@ -146,7 +148,10 @@ void loop() {
 		{
 			for (myAngle = 180; myAngle >= (180 - ang); myAngle--) {
 				servoPulse(servoPin, myAngle);
+				delay(2);
 			}
+			delay(500);
+			return;
 		}
 		}
 	}
